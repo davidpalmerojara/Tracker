@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, width=device-width" />
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.0/mapsjs-ui.css?dp-version=1549984893" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+  rel="stylesheet">
+<script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+<script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+<script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
+<script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+<!-- CSS-->
+
+    </head>
+    <body>
+        <nav class="navbar navbar-light bg-light " style="position:fixed; z-index: 100; width: 100vw;">
+          <h1 style="font-family:kanit; color: rgb(106, 168, 79); font-size:30px; font-weight: bold;">TRACKER</h1>
+                <div class="form-inline ml-auto"  onsubmit="getInpuValue()">
+                  <div class="col-xm-11">
+                    <input id="myInput" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                  </div>
+                  <div class="col-xm-1">
+                  <button id="myButton" class="btn btn-outline-success my-2 my-sm-0" style="border-color: rgb(106, 168, 79)!important" type="button" onsubmit="getInpuValue()" onclick="getInputValue()"><i class="fa-solid fa-magnifying-glass-location"></i></button>
+                </div>
+                </div>
+        </nav>
+              
+
+<div id="map" style="width: 100vw; height: 100vh; background: grey" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+<script src="https://kit.fontawesome.com/262134bbdc.js" crossorigin="anonymous"></script>
+<script  type="text/javascript" charset="UTF-8" >
+    var locations, shape;
+    var coord;
+// Collapse buttons in left navbar.
+    var check = false;
+    
+    // step 1: initialize communication with the platform
+    var platform = new H.service.Platform({
+        apikey: 'zsBoFPMAgUuOHd8CgR_z-AIcylBMdvYJzjQknmHqlE4'
+    });
+
+    var defaultLayers = platform.createDefaultLayers();
+    var service = platform.getSearchService();
+    var input = document.getElementById("myInput");
+    var query = 'madrid';
+    var marker;
+    var circle;
+    var coordinates;
+    setLocation(query);
+    // step 2: initialize a map - this map is centered over Santa Cruz de la Zarza
+    var map = new H.Map(
+        document.getElementById('map'),
+        defaultLayers.vector.normal.map,
+        {
+            zoom: 7,
+            center: { lat: 40.416775, lng: -3.703790 }
+    });
+    // step 3: make the map interactive
+//    var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+    
+        
+      
+
+    
+
+
+ input.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13)
+  {
+      event.preventDefault();
+      document.getElementById("myButton").click();
+      document.getElementById("myInput").blur();
+  }
+})
+function getInputValue()
+{
+  query = document.getElementById("myInput").value;
+  document.getElementById("myInput").value = "";
+  document.getElementById("myInput").blur();
+  setLocation(query);
+}
+
+
+function setLocation(query)
+{
+  service.geocode({
+      q: query
+  }, (result) => {
+      for (let i = 0; i < 1; i++)
+      {
+          if (check)
+          {
+            map.removeObject(marker);
+            map.removeObject(circle);
+          }
+          console.log(result)
+          coord = { lat: result.items[i].position.lat, lng: result.items[i].position.lng };
+          marker = new H.map.Marker(result.items[i].position);
+          map.addObject(marker);
+          map.setCenter({
+              lat: coord.lat,
+              lng: coord.lng
+          })
+          map.setZoom(15.8);
+          circle = new H.map.Circle(
+            // The central point of the circle
+            {lat: coord.lat, lng: coord.lng},
+            // The radius of the circle in meters
+            1000,
+            {
+              style: {
+                strokeColor: 'rgba(55, 85, 170, 1)', // Color of the perimeter
+                lineWidth: 3,
+                fillColor: 'rgba(0, 128, 0, 0.3)'  // Color of the circle
+              }
+            }
+          
+          )
+          map.addObject(circle);
+        check = true;
+          
+      }
+  }, alert);
+}
+
+
+    var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+    // step 4: create the default UI components
+    var ui = H.ui.UI.createDefault(map, defaultLayers);
+    window.addEventListener('resize', function () {
+        map.getViewPort().resize(); 
+    });
+  </script>
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</body>
+</html>
